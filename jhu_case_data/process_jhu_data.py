@@ -4,7 +4,8 @@ import datetime
 from google.cloud import bigquery
 
 filename = 'jhu_data.csv'
-url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
+url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/" \
+      "csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
 
 
 def get_states_data():
@@ -49,7 +50,7 @@ def process_states(df: pd.DataFrame):
     return pd.concat([df, states_df])
 
 
-if __name__ == '__main__':
+def primary_process():
     if get_and_save_data():
         data_df = pd.read_csv(filename)
     else:
@@ -57,7 +58,7 @@ if __name__ == '__main__':
 
     # Drop Lat and Long as we don't need this
     data_df = data_df.drop(['Lat', 'Long'], axis=1)
-    
+
     # Rename columns to remove / - BQ doesn't like that
     data_df = data_df.rename({'Province/State': 'Province_State', 'Country/Region': 'Country_Region'}, axis=1)
 
@@ -78,3 +79,7 @@ if __name__ == '__main__':
     load_job = client.load_table_from_dataframe(final_df, table_id, job_config=job_config)
 
     print('Load job status: {}, {} rows loaded'.format(load_job.result().state, load_job.result().output_rows))
+
+
+if __name__ == '__main__':
+    primary_process()

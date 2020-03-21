@@ -44,15 +44,20 @@ def load_data():
     return data_df
 
 
-df = load_data()
+def primary_process():
+    df = load_data()
 
-# Write to BQ
-client = bigquery.Client.from_service_account_json("C:\\tb-covid-19.json")
-table_id = 'covid19_data.us_unemployment'
-job_config = bigquery.LoadJobConfig(autodetect=True,
-                                    time_partitioning=bigquery.table.TimePartitioning(field='week_ending'),
-                                    clustering_fields=['st'],
-                                    write_disposition='WRITE_TRUNCATE')
-load_job = client.load_table_from_dataframe(df, table_id, job_config=job_config)
+    # Write to BQ
+    client = bigquery.Client.from_service_account_json("C:\\tb-covid-19.json")
+    table_id = 'covid19_data.us_unemployment'
+    job_config = bigquery.LoadJobConfig(autodetect=True,
+                                        time_partitioning=bigquery.table.TimePartitioning(field='week_ending'),
+                                        clustering_fields=['st'],
+                                        write_disposition='WRITE_TRUNCATE')
+    load_job = client.load_table_from_dataframe(df, table_id, job_config=job_config)
 
-print('Load job status: {}, {} rows loaded'.format(load_job.result().state, load_job.result().output_rows))
+    print('Load job status: {}, {} rows loaded'.format(load_job.result().state, load_job.result().output_rows))
+
+
+if __name__ == '__main__':
+    primary_process()
