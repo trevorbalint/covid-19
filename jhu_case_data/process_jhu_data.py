@@ -69,8 +69,8 @@ if __name__ == '__main__':
     final_df = process_states(pivoted_df)
 
     # Write to BQ
-    client = bigquery.Client()
-    table_id = 'covid19.cases_data'
+    client = bigquery.Client.from_service_account_json("C:\\tb-covid-19.json")
+    table_id = 'covid19_data.cases_data'
     job_config = bigquery.LoadJobConfig(autodetect=True,
                                         time_partitioning=bigquery.table.TimePartitioning(field='Date'),
                                         clustering_fields=['Country_Region'],
