@@ -68,6 +68,10 @@ def primary_process():
 
     # Fix US data
     final_df = process_states(pivoted_df)
+    final_df.sort_values(['Province_State', 'Country_Region'], inplace=True)
+
+    final_df['Daily_Cases'] = final_df['Cases'] - \
+                              final_df.groupby(['Province_State', 'Country_Region'])['Cases'].shift(1)
 
     # Write to BQ
     client = bigquery.Client.from_service_account_json("C:\\tb-covid-19.json")
