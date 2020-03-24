@@ -2,7 +2,7 @@ import pandas as pd
 import requests
 import os
 import datetime
-from google.cloud import bigquery
+from covid_lib import bigquery_interface as cbq
 
 data_url = 'https://oui.doleta.gov/unemploy/csv/ar539.csv'
 filename = 'doleta_data.csv'
@@ -48,15 +48,7 @@ def primary_process():
     df = load_data()
 
     # Write to BQ
-    client = bigquery.Client.from_service_account_json("C:\\tb-covid-19.json")
-    table_id = 'covid19_data.us_unemployment'
-    job_config = bigquery.LoadJobConfig(autodetect=True,
-                                        time_partitioning=bigquery.table.TimePartitioning(field='week_ending'),
-                                        clustering_fields=['st'],
-                                        write_disposition='WRITE_TRUNCATE')
-    load_job = client.load_table_from_dataframe(df, table_id, job_config=job_config)
-
-    print('Load job status: {}, {} rows loaded'.format(load_job.result().state, load_job.result().output_rows))
+    cbq.write_df_to_bq('us_unemployment', 'week_ending', ['st'], df)
 
 
 if __name__ == '__main__':
