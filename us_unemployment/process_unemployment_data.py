@@ -38,7 +38,7 @@ def load_data():
         download_data()
     data_df = pd.read_csv(filename, na_values=" ")
     data_df.rename(columns, axis=1, inplace=True)
-    for column in ['rptdate', 'week_ending', 'curdate', 'prior3wk', 'priorwk']:
+    for column in ['rptdate', 'week_ending', 'curdate', 'priorwk']:
         data_df[column] = pd.to_datetime(data_df[column], format='%m/%d/%Y')
         data_df[column] = data_df[column].dt.date
     return data_df
