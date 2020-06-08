@@ -2,6 +2,7 @@ import requests
 import pandas as pd
 import datetime
 from covid_lib import bigquery_interface as cbq
+from covid_lib import functions as f
 
 global_filename = 'global_jhu_data.csv'
 us_filename = 'us_jhu_data.csv'
@@ -15,18 +16,11 @@ def get_states_data():
     return pd.read_csv('states.csv')
 
 
-def get_and_save_data(url, filename):
-    r = requests.get(url)
-    with open(filename, 'wb') as f:
-        f.write(r.content)
-    return True
-
-
 def initial_data_process(url, filename):
     """Takes a URL and filename. Gets the data from that URL and saves it to that filename,
     then does basic processing like renaming columns and pivoting to be an actual time series.
     """
-    if get_and_save_data(url, filename):
+    if f.get_and_save_data(url, filename):
         df = pd.read_csv(filename)
     else:
         raise IOError("Data I/O error")

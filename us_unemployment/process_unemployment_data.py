@@ -3,6 +3,7 @@ import requests
 import os
 import datetime
 from covid_lib import bigquery_interface as cbq
+from covid_lib import functions as f
 
 data_url = 'https://oui.doleta.gov/unemploy/csv/ar539.csv'
 filename = 'doleta_data.csv'
@@ -22,20 +23,11 @@ columns = {'c1': 'week_number', 'c2': 'week_ending',
            'c23': 'status_change_date'}
 
 
-def download_data():
-    r = requests.get(data_url)
-    if r.status_code == 200:
-        with open(filename, 'w') as f:
-            f.writelines(r.text)
-    else:
-        raise IOError('Error getting data: {}'.format(r.reason))
-
-
 def load_data():
     # If the data is stale (over 24 hours old) re-download
     if (datetime.datetime.now() - datetime.datetime.fromtimestamp(os.path.getmtime(filename))) > \
             datetime.timedelta(hours=24):
-        download_data()
+        f.get_and_save_data(data_url, filename)
     data_df = pd.read_csv(filename, na_values=" ")
     data_df.rename(columns, axis=1, inplace=True)
     for column in ['rptdate', 'week_ending', 'curdate', 'priorwk']:
