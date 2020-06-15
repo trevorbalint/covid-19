@@ -1,8 +1,8 @@
-import requests
 import pandas as pd
 import datetime
 from covid_lib import bigquery_interface as cbq
 from covid_lib import functions as f
+import numpy as np
 
 global_filename = 'global_jhu_data.csv'
 us_filename = 'us_jhu_data.csv'
@@ -58,12 +58,22 @@ def primary_process():
 
     # Combine DFs and sort. Obtain daily cases number.
     final_df = pd.concat([global_data, us_data])
-    final_df.sort_values(['Province_State', 'Country_Region'], inplace=True)
+    final_df.sort_values(['Country_Region', 'Province_State', 'Date'], inplace=True)
+    final_df = final_df.reset_index().drop(['index'], axis=1)
 
-    final_df['Daily_Cases'] = final_df['Cases'] - \
-                              final_df.groupby(['Province_State', 'Country_Region'])['Cases'].shift(1)
+    final_df[['Yesterday', 'Yesterday_country', 'Yesterday_province']] = \
+        final_df[['Cases', 'Country_Region', 'Province_State']].shift(1)
 
-    # Write to BQ
+    # must iterate through rows - other methods haven't worked well
+    for i, row in final_df.iterrows():
+        if row['Yesterday_country'] == row['Country_Region'] and \
+                (row['Province_State'] is np.nan or row['Yesterday_province'] == row['Province_State']):
+            final_df.loc[i, 'Daily_Cases'] = row['Cases'] - row['Yesterday']
+        else:
+            final_df.loc[i, 'Daily_Cases'] = 0
+
+    # Correct schema and write to BQ
+    final_df = final_df.drop(['Yesterday_country', 'Yesterday_province', 'Yesterday'], axis=1)
     cbq.write_df_to_bq('cases_data', 'Date', ['Country_Region'], final_df)
 
 
