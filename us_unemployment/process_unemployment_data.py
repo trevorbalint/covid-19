@@ -1,5 +1,4 @@
 import pandas as pd
-import requests
 import os
 import datetime
 from covid_lib import bigquery_interface as cbq
