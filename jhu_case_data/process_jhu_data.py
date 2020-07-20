@@ -65,6 +65,7 @@ def primary_process():
         final_df[['Cases', 'Country_Region', 'Province_State']].shift(1)
 
     # must iterate through rows - other methods haven't worked well
+    # todo change this to df.apply()
     for i, row in final_df.iterrows():
         if row['Yesterday_country'] == row['Country_Region'] and \
                 (row['Province_State'] is np.nan or row['Yesterday_province'] == row['Province_State']):
